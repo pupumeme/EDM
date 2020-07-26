@@ -17,33 +17,33 @@ feature_names=tfidf.get_feature_names()
 def kcm(word,e):
 	if word in vocab:
 		i=vocab[word]
-		doc_arr=X.T[i].toarray()[0]
-		doc_id_arr=(-doc_arr).argsort()
+		# doc_arr=X.T[i].toarray()[0]
+		# doc_id_arr=(-doc_arr).argsort()
 		
+		cx=X[:,i].tocoo()
+		zip_list=[z for z in zip(cx.data, cx.row) if z[0]<1 and z[0]>0]
+		doc_id_arr=sorted(zip_list,key = lambda z: z[0],reverse=True)
+
+
 		top_k=800
 		n=0
 		bag=[word]
 
 		for doc_id in doc_id_arr:
+			doc_id=doc_id[1]
 			if n>=top_k:
 				break
-			# print(doc_arr[doc_id])
-			if doc_arr[doc_id] < 1 and doc_arr[doc_id] >0:
-				data=X.data[X.indptr[doc_id]:X.indptr[doc_id+1]]
-				index=X.indices[X.indptr[doc_id]:X.indptr[doc_id+1]]
-				zip_list=[z for z in zip(data,index) if z[0]<1 and z[0]>0]
-				w_id=sorted(zip_list,key = lambda z: z[0],reverse=True)
-				# w_id = [x[1] for x in list1][:40]
-				for _id in w_id :
-					# if arrs[_id] == 0:
-					# 	break
-					if feature_names[_id[1]] not in e and _id[0]>0.05:
-						bag.append(feature_names[_id[1]])
-						# print(feature_names[_id],arrs[_id])
-						n+=1
-						# print(n)
-						if n>=top_k:
-							break
+			data=X.data[X.indptr[doc_id]:X.indptr[doc_id+1]]
+			index=X.indices[X.indptr[doc_id]:X.indptr[doc_id+1]]
+			zip_list=[z for z in zip(data,index) if z[0]<1 and z[0]>0]
+			w_id=sorted(zip_list,key = lambda z: z[0],reverse=True)
+			# w_id = [x[1] for x in list1][:40]
+			for _id in w_id :
+				if feature_names[_id[1]] not in e and _id[0]>0.05:
+					bag.append(feature_names[_id[1]])
+					n+=1
+					if n>=top_k:
+						break
 		return bag
 	return []
 
@@ -78,7 +78,7 @@ def main():
 
 			for i in range(20):
 				print(edm[i])
-
+			print()
 		except Exception as e:
 			print(repr(e))
 
